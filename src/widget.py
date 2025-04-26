@@ -4,7 +4,8 @@ from src.masks import get_mask_account, get_mask_card_number
 
 
 def mask_account_card(score_info: str) -> str:
-    """Функция принимает на вход строку формата 'Счет <score_number>' или '<Card> <card_number>' и возвращает маскированную строку"""
+    """Функция принимает на вход строку формата 'Счет <score_number>' или '<Card> <card_number>'
+    и возвращает маскированную строку"""
     score_info_split: list[str] = score_info.split()
     masked_info: str = ""
 
