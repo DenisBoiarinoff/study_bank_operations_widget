@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from src.widget import mask_account_card, get_date
+from src.widget import get_date, mask_account_card
 
 
 @pytest.mark.parametrize(
@@ -10,10 +10,10 @@ from src.widget import mask_account_card, get_date
     [
         ("Счет 73654108430135874305", "Счет **4305"),
         ("Visa Platinum 7000792289606361", "Visa Platinum 7000 79** **** 6361"),
-        ("Maestro 7000792289606361", "Maestro 7000 79** **** 6361")
-    ]
+        ("Maestro 7000792289606361", "Maestro 7000 79** **** 6361"),
+    ],
 )
-def test_mask_account_card_valid_data(input, output):
+def test_mask_account_card_valid_data(input: str, output: str) -> None:
     assert mask_account_card(input) == output
 
 
@@ -29,12 +29,13 @@ def test_mask_account_card_valid_data(input, output):
         (""),
         ("          "),
         ("7000 7922 8960 6361"),
-        ("73654108430154354335874305")
-    ]
+        ("73654108430154354335874305"),
+    ],
 )
-def test_mask_account_card_invalid_data(input):
-    with pytest.raises(ValueError) as exc_info:
+def test_mask_account_card_invalid_data(input: str) -> None:
+    with pytest.raises(ValueError):
         mask_account_card(input)
+
 
 @pytest.mark.parametrize(
     "input, output",
@@ -43,15 +44,15 @@ def test_mask_account_card_invalid_data(input):
         ("2019-07-03", "03.07.2019"),
         ("2018-06-30T02:08:58", "30.06.2018"),
         ("2021-09-12T21:27:25.241689", "12.09.2021"),
-        ("2020-10-14T08:21", "14.10.2020")
-    ]
+        ("2020-10-14T08:21", "14.10.2020"),
+    ],
 )
-def test_get_date_valid_data(input, output):
+def test_get_date_valid_data(input: str, output: str) -> None:
     assert get_date(input) == output
 
 
-def test_get_date_current_date(current_date):
-    assert get_date(current_date) == datetime.today().strftime('%d.%m.%Y')
+def test_get_date_current_date(current_date: str) -> None:
+    assert get_date(current_date) == datetime.today().strftime("%d.%m.%Y")
 
 
 @pytest.mark.parametrize(
@@ -66,8 +67,8 @@ def test_get_date_current_date(current_date):
         ("2021-01-12T21:70:25.241689"),
         ("2021-01-12T26:27:70.241689"),
         ("2021-01-12T26:27:25.2416896546754"),
-    ]
+    ],
 )
-def test_get_date_invalid_data(input):
-    with pytest.raises(ValueError) as exc_info:
+def test_get_date_invalid_data(input: str) -> None:
+    with pytest.raises(ValueError):
         get_date(input)

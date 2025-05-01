@@ -1,6 +1,8 @@
-import pytest
 from datetime import datetime
 
+import pytest
+
+
 @pytest.fixture
-def current_date():
+def current_date() -> str:
     return datetime.now().isoformat()
