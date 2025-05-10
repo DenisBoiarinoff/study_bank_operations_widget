@@ -9,10 +9,15 @@ def mask_account_card(score_info: str) -> str:
     score_info_split: list[str] = score_info.split()
     masked_info: str = ""
 
-    if score_info_split[0] == "Счет":
+    if len(score_info_split) < 2:
+        raise ValueError("Wrong  data.")
+
+    if score_info_split[0] == "Счет" and len(score_info_split) == 2:
         masked_info = get_mask_account(score_info.split()[-1])
-    else:
+    elif score_info_split[0] != "Счет":
         masked_info = get_mask_card_number(score_info.split()[-1])
+    else:
+        raise ValueError("Wrong  data.")
 
     return f"{' '.join(score_info_split[:-1])} {masked_info}"
 
