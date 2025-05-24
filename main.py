@@ -1,5 +1,6 @@
 from src.masks import get_mask_account, get_mask_card_number
 from src.processing import filter_by_state, sort_by_date
+from src.utils import get_transaction_ammount, read_transactions_data
 from src.widget import get_date, mask_account_card
 
 print(get_mask_card_number("7000792289606361"))
@@ -50,3 +51,11 @@ print(
         reverse=False,
     )
 )
+print("------------------------------------------------------------")
+print(read_transactions_data("./data/operations.json"))
+print(read_transactions_data("./data/operations1.json"))
+print(read_transactions_data("./data/test.json"))
+print("-------------------------------------------------------------")
+operations_data = read_transactions_data("./data/operations.json")
+print(get_transaction_ammount(operations_data[0]))
+print(get_transaction_ammount(operations_data[1]))

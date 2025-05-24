@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Optional, Callable
+from typing import Optional
 
 
 def write_result(message: str, filename: Optional[str] = None) -> None:
