@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import pytest
@@ -30,3 +31,11 @@ def valid_operations_data_dict() -> list:
             "to": "Счет 35383033474447895560",
         },
     ]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_test_files():
+    yield
+    test_file = "tmp.log"
+    if os.path.exists(test_file):
+        os.remove(test_file)

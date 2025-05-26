@@ -31,3 +31,23 @@ def log(filename: Optional[str] = None):
         return inner
 
     return decorator
+
+
+def log_with_logger(logger):
+    """Декоратор для логирования функций с помощью ллггера"""
+
+    def decorator(func):
+        @wraps(func)
+        def inner(*args, **kwargs):
+            logger.info(f"Will start {func.__name__}")
+            try:
+                result = func(*args, **kwargs)
+                logger.info(f"Will return {result}")
+            except Exception as e:
+                logger.error(f"{func.__name__} - {type(e).__name__}. Inputs: {args}, {kwargs}")
+                raise e
+            return result
+
+        return inner
+
+    return decorator

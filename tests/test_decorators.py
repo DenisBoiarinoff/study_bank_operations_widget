@@ -1,8 +1,18 @@
+import logging
 import os
 
 import pytest
 
-from src.decorators import log
+from src.decorators import log, log_with_logger
+
+test_logger = logging.getLogger("test_logger")
+test_logger.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler("tmp.log", "w")
+test_logger.addHandler(file_handler)
+
+logger_formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s: %(message)s")
+file_handler.setFormatter(logger_formatter)
 
 
 @log()
@@ -12,6 +22,11 @@ def console_decorated_console_function(x, y):
 
 @log("tmp.txt")
 def console_decorated_file_function(x, y):
+    return x + y
+
+
+@log_with_logger(test_logger)
+def logger_decorated_function(x, y):
     return x + y
 
 
@@ -100,3 +115,75 @@ def test_decorator_success_file_output(first, second, file_string):
             assert lines[1] == file_string
     finally:
         os.remove("tmp.txt")
+
+
+@pytest.mark.parametrize(
+    "first, second, log_strings",
+    [
+        (
+            1,
+            1,
+            [
+                "test_logger INFO: Will start logger_decorated_function\n",
+                "test_logger INFO: Will return 2\n",
+            ],
+        ),
+        ("1", "1", ["test_logger INFO: Will start logger_decorated_function\n", "test_logger INFO: Will return 11\n"]),
+        (
+            True,
+            True,
+            ["test_logger INFO: Will start logger_decorated_function\n", "test_logger INFO: Will return 2\n"],
+        ),
+    ],
+)
+def test_log_with_logger_decorator_valid_data(first, second, log_strings):
+    try:
+        logger_decorated_function(first, second)
+    except Exception:
+        assert False
+    else:
+        with open("tmp.log", "r") as file:
+            lines = file.readlines()
+            for index, string in enumerate(log_strings):
+                assert string in lines[-(len(log_strings) - index)]
+
+
+@pytest.mark.parametrize(
+    "first, second, log_strings",
+    [
+        (
+            1,
+            [1],
+            [
+                "test_logger INFO: Will start logger_decorated_function\n",
+                "test_logger ERROR: logger_decorated_function - TypeError. Inputs: (1, [1]), {}\n",
+            ],
+        ),
+        (
+            1,
+            (1,),
+            [
+                "test_logger INFO: Will start logger_decorated_function\n",
+                "test_logger ERROR: logger_decorated_function - TypeError. Inputs: (1, (1,)), {}\n",
+            ],
+        ),
+        (
+            1,
+            "1",
+            [
+                "test_logger INFO: Will start logger_decorated_function\n",
+                "test_logger ERROR: logger_decorated_function - TypeError. Inputs: (1, '1'), {}\n",
+            ],
+        ),
+    ],
+)
+def test_log_with_logger_decorator_invalid_data(first, second, log_strings):
+    try:
+        logger_decorated_function(first, second)
+    except Exception:
+        with open("tmp.log", "r") as file:
+            lines = file.readlines()
+            for index, string in enumerate(log_strings):
+                assert string in lines[-(len(log_strings) - index)]
+    else:
+        assert False
