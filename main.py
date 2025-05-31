@@ -1,3 +1,4 @@
+from src.data_readers import read_csv_data, read_exel_data
 from src.masks import get_mask_account, get_mask_card_number
 from src.processing import filter_by_state, sort_by_date
 from src.utils import get_transaction_ammount, read_transactions_data
@@ -66,3 +67,8 @@ if __name__ == "__main__":
     operations_data = read_transactions_data("./data/operations.json")
     print(get_transaction_ammount(operations_data[0]))
     print(get_transaction_ammount(operations_data[1]))
+    print("-------------------------------------------------------------")
+    csv_data = read_csv_data("./data/transactions.csv")
+    print(csv_data[:5])
+    exel_data = read_exel_data("./data/transactions_excel.xlsx")
+    print(exel_data[:5])
