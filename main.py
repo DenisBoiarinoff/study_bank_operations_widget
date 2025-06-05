@@ -88,9 +88,8 @@ def ask_for_rub_filter(processing_settings: dict) -> dict:
 
     user_answer = ""
     while user_answer.upper() not in valid_answers:
-        # if user_answer.upper() not in valid_answers
-        print("Выводить только рублевые транзакции? Да/Нет\n")
-        user_answer = input("Пользователь: ")
+        print("Программа: Выводить только рублевые транзакции? Да/Нет\n")
+        user_answer = input("Пользователь: ").strip()
 
     user_answer = user_answer.upper()
 
@@ -105,12 +104,19 @@ def ask_for_description_filter(processing_settings: dict) -> dict:
 
     user_answer = ""
     while user_answer.upper() not in valid_answers:
-        print("Отфильтровать список транзакций по определенному слову в описании? Да/Нет\n")
-        user_answer = input("Пользователь: ")
+        print("Программа: Отфильтровать список транзакций по определенному слову в описании? Да/Нет\n")
+        user_answer = input("Пользователь: ").strip()
 
     user_answer = user_answer.upper()
 
     processing_settings["description_filter"] = user_answer == valid_answers[0]
+
+    if user_answer == valid_answers[0]:
+        print("Программа: Введите слово для фильтрации")
+        filter_word = ""
+        while len(filter_word.strip()) == 0:
+            filter_word =  input("Пользователь: ")
+            processing_settings["filter_word"] = filter_word
 
     return processing_settings
 
@@ -141,13 +147,17 @@ def execute_processing(processing_settings: dict) -> None:
         operations_data = filter_by_rub(operations_data)
 
     if processing_settings.get("description_filter", True):
-        operations_data = find_by_description(operations_data, "Открытие")
+        operations_data = find_by_description(operations_data, processing_settings.get("filter_word", ""))
 
     print_processing_result(operations_data)
 
 
 def print_processing_result(operations: list[dict]) -> None:
     """Выводит результат обработкм данных на экран"""
+
+    if len(operations) == 0:
+        print("Программа: Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
+
     print("Программа: Распечатываю итоговый список транзакций...\n")
     print(f"Программа: Всего банковских операций в выборке: {len(operations)}\n")
 
@@ -156,15 +166,14 @@ def print_processing_result(operations: list[dict]) -> None:
 
         money_source = operation.get("from")
         if money_source is not None:
-            print(f"{mask_account_card(operation.get("from"))}\n")
+            print(f"{mask_account_card(money_source)}\n")
 
         amount = operation.get("operationAmount")
         if amount is not None:
             print(f"Сумма: {amount.get("amount")} {amount.get("currency").get("name")}")
 
 
-if __name__ == "__main__":
-
+def main() -> None:
     print("Программа: Привет! Добро пожаловать в программу работы с банковскими транзакциями.\n")
     program_settings = {}
 
