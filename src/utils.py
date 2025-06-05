@@ -1,7 +1,10 @@
 import json
 import logging
 import os
+from csv import DictReader
 from typing import List
+
+import pandas as pd
 
 from src.decorators import log_with_logger
 from src.external_api import get_converted_amount
@@ -44,3 +47,26 @@ def get_transaction_ammount(transaction: dict) -> float:
     else:
         logger.info("Will requesting external api")
         return get_converted_amount(transaction_concurrency_code, transaction_concurrency_amount)
+
+
+def read_csv_data(filename: str) -> list[dict]:
+    """Возвращает список словарей с данными файла .csv имя которого передано в качестве параметра"""
+    result = []
+    try:
+        with open(filename) as csv_file:
+            reader = DictReader(csv_file, delimiter=";")
+            result = list(reader)
+    except Exception:
+        pass
+    return result
+
+
+def read_exel_data(filename: str) -> list[dict]:
+    """Возвращает список словарей с данными файла .xlsx имя которого передано в качестве параметра"""
+    result = []
+    try:
+        excel_data = pd.read_excel(filename)
+        result = excel_data.to_dict(orient="records")
+    except Exception:
+        pass
+    return result

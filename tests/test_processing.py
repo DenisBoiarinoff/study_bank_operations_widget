@@ -1,6 +1,6 @@
 import pytest
 
-from src.processing import filter_by_state, sort_by_date
+from src.processing import filter_by_rub, filter_by_state, group_operations_by_transaction, sort_by_date
 
 
 @pytest.mark.parametrize(
@@ -219,4 +219,121 @@ def test_sort_by_date_wrong_date_format(input: list[dict]) -> None:
 )
 def test_sort_by_date_odd_date_format(input: dict) -> None:
     with pytest.raises(ValueError):
+        sort_by_date(input)
+
+
+@pytest.mark.parametrize(
+    "data, groups, output",
+    [
+        (
+            [
+                {"id": 1, "description": "1"},
+                {"id": 2, "description": "2"},
+                {"id": 3, "description": "1"},
+                {"id": 4, "description": "2"},
+                {"id": 5, "description": "3"},
+            ],
+            ["1", "2", "3"],
+            {"1": 2, "2": 2, "3": 1},
+        ),
+    ],
+)
+def test_group_operations_by_transaction_valid_data(data, groups, output) -> None:
+    result = group_operations_by_transaction(data, groups)
+    for key, value in output.items():
+        assert value == result[key]
+
+
+@pytest.mark.parametrize("data, groups, output", [([], ["1", "2"], {"1": 0, "2": 0, "3": 0})])
+def test_group_operations_by_transaction_odd_data(data, groups, output) -> None:
+    result = group_operations_by_transaction(data, groups)
+    for key, value in output.items():
+        assert value == result[key]
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        ([], []),
+        (
+            [
+                {"id": 1, "operationAmount": {"currency": {"code": "RUB"}}},
+                {"id": 2, "operationAmount": {"currency": {"code": "USD"}}},
+                {"id": 3, "operationAmount": {"currency": {"code": "RUB"}}},
+                {"id": 4, "operationAmount": {"currency": {"code": "EWR"}}},
+                {"id": 5, "operationAmount": {"currency": {"code": "RUB"}}},
+                {"id": 6, "operationAmount": {"currency": {"code": "123"}}},
+                {"id": 7, "operationAmount": {"currency": {"code": "QWE"}}},
+            ],
+            [1, 3, 5],
+        ),
+        (
+            [
+                {"id": 1, "operationAmount": {"currency": {"code": "123"}}},
+                {"id": 2, "operationAmount": {"currency": {"code": "USD"}}},
+                {"id": 3, "operationAmount": {"currency": {"code": "QWE"}}},
+                {"id": 4, "operationAmount": {"currency": {"code": "EWR"}}},
+                {"id": 5, "operationAmount": {"currency": {"code": "USD"}}},
+                {"id": 6, "operationAmount": {"currency": {"code": "123"}}},
+                {"id": 7, "operationAmount": {"currency": {"code": "QWE"}}},
+            ],
+            [],
+        ),
+    ],
+)
+def test_filter_by_rub_valid_data(input, output) -> None:
+    result = filter_by_rub(input)
+    assert len(result) == len(result)
+    for item in result:
+        assert item["id"] in output
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        (
+            [
+                {"id": 1},
+                {"id": 2},
+                {"id": 3},
+            ]
+        ),
+        (
+            [
+                {"id": 1, "operationAmount": "data"},
+                {"id": 2, "operationAmount": 2},
+                {"id": 3, "operationAmount": True},
+                {"id": 3, "operationAmount": {"1": 2}},
+                {
+                    "id": 4,
+                    "operationAmount": [
+                        1,
+                        2,
+                        3,
+                    ],
+                },
+            ]
+        ),
+        (
+            [
+                {"id": 1, "operationAmount": {"currency": "RUB"}},
+                {"id": 2, "operationAmount": {"currency": 123}},
+                {"id": 3, "operationAmount": {"currency": True}},
+                {"id": 4, "operationAmount": {"currency": {"1": 2}}},
+                {"id": 5, "operationAmount": {"currency": [1, 2, 3]}},
+            ]
+        ),
+        (
+            [
+                {"id": 2, "operationAmount": {"currency": {"name": ".руб"}}},
+                {"id": 2, "operationAmount": {"currency": {"code": 123}}},
+                {"id": 3, "operationAmount": {"currency": {"code": True}}},
+                {"id": 4, "operationAmount": {"currency": {"code": {"1": 2}}}},
+                {"id": 5, "operationAmount": {"currency": {"code": [1, 2, 3]}}},
+            ]
+        ),
+    ],
+)
+def test_filter_by_rub_invalid_data(input) -> None:
+    with pytest.raises(KeyError):
         sort_by_date(input)
